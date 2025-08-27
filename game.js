@@ -53,19 +53,6 @@ function submitScore() {
     });
   }
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Get the best score from local storage (the game saves it with the key "best")
-    const bestScore = localStorage.getItem('best');
-    const displayElement = document.querySelector('#best-score-display span');
-
-    // Update the text on the page
-    if (bestScore) {
-        displayElement.textContent = bestScore;
-    } else {
-        displayElement.textContent = '0';
-    }
-});
 // --- End of new block ---
 
 const RAD = Math.PI / 180;
@@ -343,6 +330,7 @@ const UI = {
             localStorage.getItem("best")
           );
           localStorage.setItem("best", this.score.best);
+          updateBestScoreDisplay(); // Add this line
           let bs = `BEST  :     ${this.score.best}`;
           sctx.fillText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
           sctx.strokeText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
@@ -406,3 +394,20 @@ function draw() {
 }
 
 setInterval(gameLoop, 20);
+
+// This function can now be called from anywhere
+function updateBestScoreDisplay() {
+    const bestScore = localStorage.getItem('best');
+    const displayElement = document.querySelector('#best-score-display span');
+
+    if (displayElement) { // Check if the element exists
+        if (bestScore) {
+            displayElement.textContent = bestScore;
+        } else {
+            displayElement.textContent = '0';
+        }
+    }
+}
+
+// Update the display when the page first loads
+document.addEventListener('DOMContentLoaded', updateBestScoreDisplay);
