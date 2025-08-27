@@ -1,3 +1,73 @@
+// --- Add this block at the top ---
+const urlParams = new URLSearchParams(window.location.search);
+const username = urlParams.get('name');
+const email = urlParams.get('email');
+
+// If the parameters exist in the URL, store them in the browser
+if (username) {
+  localStorage.setItem('userName', username);
+}
+if (email) {
+  localStorage.setItem('userEmail', email);
+}
+
+// Add this entire function
+function submitScore() {
+  // Retrieve score and user info
+  const currentScore = UI.score.curr;
+  const bestScore = UI.score.best;
+  const savedName = localStorage.getItem('userName') || 'Anonymous';
+  const savedEmail = localStorage.getItem('userEmail') || 'No Email';
+
+  // Ask the player if they want to submit
+  const wantsToSubmit = confirm(`Game Over!\n\nYour Score: ${currentScore}\nBest Score: ${bestScore}\n\nDo you want to submit your score?`);
+
+  if (wantsToSubmit) {
+    // Prepare the data to send
+    const scoreData = {
+      name: savedName,
+      email: savedEmail,
+      score: currentScore,
+      bestScore: bestScore,
+      game: 'Flappy Bird'
+    };
+    
+    console.log("Submitting data:", scoreData);
+
+    // --- Send the data to your backend server ---
+    fetch('https://submitflappbirdform-gksuylu43a-uc.a.run.app', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(scoreData),
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert("Score submitted successfully!");
+      console.log('Success:', data);
+    })
+    .catch(error => {
+      alert("Could not submit score. Please try again.");
+      console.error('Error:', error);
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Get the best score from local storage (the game saves it with the key "best")
+    const bestScore = localStorage.getItem('best');
+    const displayElement = document.querySelector('#best-score-display span');
+
+    // Update the text on the page
+    if (bestScore) {
+        displayElement.textContent = bestScore;
+    } else {
+        displayElement.textContent = '0';
+    }
+});
+// --- End of new block ---
+
 const RAD = Math.PI / 180;
 const scrn = document.getElementById("canvas");
 const sctx = scrn.getContext("2d");
@@ -12,6 +82,7 @@ scrn.addEventListener("click", () => {
       bird.flap();
       break;
     case state.gameOver:
+      submitScore(); // Ask to submit the score
       state.curr = state.getReady;
       bird.speed = 0;
       bird.y = 100;
